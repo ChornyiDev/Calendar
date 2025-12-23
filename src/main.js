@@ -59,6 +59,9 @@ function init() {
     // Hide details as they might be stale
     slotDetailsEl.classList.add('hidden');
   });
+  
+  // Initialize button states
+  updateNavButtons(0);
 }
 
 function populateTimezoneSelector() {
@@ -96,10 +99,36 @@ function updateLegend() {
   }
 }
 
+// Limit navigation to 2 months back and 2 months forward relative to TODAY
 function changeMonth(delta) {
-  currentDate.setMonth(currentDate.getMonth() + delta);
-  renderCalendar();
-  slotDetailsEl.classList.add('hidden');
+  const newDate = new Date(currentDate);
+  newDate.setMonth(newDate.getMonth() + delta);
+  
+  const today = new Date();
+  // Normalize comparison to 1st of month to avoid issues with day overflow
+  const compareDate = new Date(newDate.getFullYear(), newDate.getMonth(), 1);
+  const compareToday = new Date(today.getFullYear(), today.getMonth(), 1);
+  
+  // Calculate difference in months
+  const monthDiff = (compareDate.getFullYear() - compareToday.getFullYear()) * 12 + (compareDate.getMonth() - compareToday.getMonth());
+  
+  // Allow: 0 (current), ..., +2 (2 months future). No past months.
+  if (monthDiff >= 0 && monthDiff <= 2) {
+    currentDate = newDate;
+    renderCalendar();
+    slotDetailsEl.classList.add('hidden');
+    updateNavButtons(monthDiff); // Optional: Disable buttons visually
+  }
+}
+
+function updateNavButtons(diff) {
+  // Update button states if at edge
+  // Disable prev button if we are at current month (diff 0) or earlier
+  prevBtn.style.opacity = diff <= 0 ? '0.3' : '1';
+  prevBtn.style.pointerEvents = diff <= 0 ? 'none' : 'auto';
+  
+  nextBtn.style.opacity = diff >= 2 ? '0.3' : '1';
+  nextBtn.style.pointerEvents = diff >= 2 ? 'none' : 'auto';
 }
 
 // Helper to create a Date object representing a specific time in a specific timezone
