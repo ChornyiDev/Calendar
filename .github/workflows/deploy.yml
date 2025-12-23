@@ -28,7 +28,10 @@ jobs:
         uses: easingthemes/ssh-deploy@v5.0.3
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-          ARGS: "-rlgoDzvc -i"
+          ARGS: "-rlgoDzvc -i -e 'ssh -p ${{ secrets.REMOTE_PORT }}'" 
+          # Або якщо екшен підтримує, часто це REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
+          # Для цього конкретного екшену (easingthemes/ssh-deploy) порт задається через REMOTE_PORT
+          REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
           SOURCE: "dist/"
           REMOTE_HOST: ${{ secrets.HOST }}
           REMOTE_USER: ${{ secrets.USERNAME }}
