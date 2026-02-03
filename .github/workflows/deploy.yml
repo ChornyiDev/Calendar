@@ -29,12 +29,11 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          # Перевіряємо, чи видає сервер будь-який текст при вході (це ламає rsync)
-          OUTPUT_SIZE=$(ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -p ${{ secrets.REMOTE_PORT }} ${{ secrets.USERNAME }}@${{ secrets.HOST }} "true" | wc -c)
-          echo "Remote shell output size: $OUTPUT_SIZE bytes"
-          if [ "$OUTPUT_SIZE" -ne 0 ]; then
-            echo "::warning::Your server shell is 'dirty'! It prints text on login, which prevents rsync from working."
-          fi
+          # Використовуємо timeout, щоб крок не висів вічно, і -v для деталей
+          timeout 30s ssh -v -n -o StrictHostKeyChecking=no -o BatchMode=yes -i ~/.ssh/id_rsa -p ${{ secrets.REMOTE_PORT }} ${{ secrets.USERNAME }}@${{ secrets.HOST }} "true" > remote_output.txt 2>&1 || echo "SSH timed out or failed"
+          cat remote_output.txt
+          OUTPUT_SIZE=$(cat remote_output.txt | wc -c)
+          echo "Debug: Captured $OUTPUT_SIZE bytes of logs"
 
       - name: Deploy to Server via SSH
         uses: easingthemes/ssh-deploy@v5.0.3
