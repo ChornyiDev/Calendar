@@ -27,9 +27,9 @@ jobs:
       - name: Manual Rsync Deploy
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
           
           echo "Starting rsync transfer..."
-          rsync -rtv -vv -e "ssh -p ${{ secrets.REMOTE_PORT }} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=60" ./dist/ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ secrets.REMOTE_TARGET }}
-          echo "Transfer finished."
+          rsync -rtv --timeout=20 -e "ssh -v -p ${{ secrets.REMOTE_PORT }} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -o BatchMode=yes -o ControlMaster=no" ./dist/ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ secrets.REMOTE_TARGET }}
+          echo "Transfer finished successfully."
