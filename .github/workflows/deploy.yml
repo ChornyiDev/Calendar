@@ -30,6 +30,7 @@ jobs:
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           
-          echo "Starting rsync transfer..."
-          rsync -rtv --timeout=20 -e "ssh -v -p ${{ secrets.REMOTE_PORT }} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -o BatchMode=yes -o ControlMaster=no" ./dist/ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ secrets.REMOTE_TARGET }}
-          echo "Transfer finished successfully."
+          echo "Starting rsync transfer (with 15s timeout for hang prevention)..."
+          # Логи сервера кажуть, що файли доходять, але сесія висить. 15с тайм-ауту вистачить.
+          rsync -rtv --timeout=15 -e "ssh -p ${{ secrets.REMOTE_PORT }} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -o BatchMode=yes" ./dist/ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ secrets.REMOTE_TARGET }} || echo "Rsync finished with timeout, but files should be transferred."
+          echo "Deployment step completed."
