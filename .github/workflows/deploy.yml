@@ -24,17 +24,12 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Deploy to Server via SSH
-        uses: easingthemes/ssh-deploy@v5.0.3
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-          ARGS: "-rlgoDv" 
-          SSH_CMD_ARGS: "-o StrictHostKeyChecking=no -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=15 -o BatchMode=yes"
-          REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
-          SOURCE: "dist/"
-          REMOTE_HOST: ${{ secrets.HOST }}
-          REMOTE_USER: ${{ secrets.USERNAME }}
-          TARGET: ${{ secrets.REMOTE_TARGET }}
-          SCRIPT_AFTER: |
-            echo "Deployment successful! Files have been transferred to ${{ secrets.REMOTE_TARGET }}"
-            ls -la ${{ secrets.REMOTE_TARGET }} | head -n 5
+      - name: Manual Rsync Deploy
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          
+          echo "Starting rsync transfer..."
+          rsync -rtv -vv -e "ssh -p ${{ secrets.REMOTE_PORT }} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=60" ./dist/ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ secrets.REMOTE_TARGET }}
+          echo "Transfer finished."
