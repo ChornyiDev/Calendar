@@ -29,12 +29,12 @@ jobs:
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
           ARGS: "-rlgoDv" 
-          SSH_CMD_ARGS: "-o StrictHostKeyChecking=no -o UpdateHostkeys=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=15 -o BatchMode=yes"
+          SSH_CMD_ARGS: "-o StrictHostKeyChecking=no -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=15 -o BatchMode=yes"
           REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
           SOURCE: "dist/"
           REMOTE_HOST: ${{ secrets.HOST }}
           REMOTE_USER: ${{ secrets.USERNAME }}
           TARGET: ${{ secrets.REMOTE_TARGET }}
-          # Якщо aaPanel вимагає, щоб файли належали користувачу www (а ви заходите як root),
-          # розкоментуйте рядок нижче:
-          # SCRIPT_AFTER: "chown -R www:www ${{ secrets.REMOTE_TARGET }}"
+          SCRIPT_AFTER: |
+            echo "Deployment successful! Files have been transferred to ${{ secrets.REMOTE_TARGET }}"
+            ls -la ${{ secrets.REMOTE_TARGET }} | head -n 5
