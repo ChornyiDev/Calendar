@@ -57,6 +57,20 @@ body {
   margin-bottom: 8px;
 }
 
+#availability-display {
+  color: var(--text-muted);
+}
+
+.availability-range {
+  color: var(--status-working);
+  font-weight: 500;
+}
+
+.timezone-abbr {
+  font-size: 0.8em;
+  opacity: 0.8;
+}
+
 /* Replaced .timezone-info with .timezone-selector-container */
 .timezone-selector-container {
   display: inline-flex;

@@ -26,3 +26,7 @@ dist-ssr
 # Deployment Keys
 deploy_key
 deploy_key.pub
+
+# Local Admin Editor
+admin.html
+src/admin.js
