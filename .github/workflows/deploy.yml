@@ -24,20 +24,12 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Debug SSH Connection
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          # Спробуємо підключитися і вивести детальну інформацію
-          ssh -o StrictHostKeyChecking=no -v -i ~/.ssh/id_rsa -p ${{ secrets.REMOTE_PORT }} ${{ secrets.USERNAME }}@${{ secrets.HOST }} "ls -la"
-
       - name: Deploy to Server via SSH
         uses: easingthemes/ssh-deploy@v5.0.3
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-          ARGS: "-rlgoDvc -v" 
-          SSH_CMD_ARGS: "-o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=10 -vv"
+          ARGS: "-rlgoDvc" 
+          SSH_CMD_ARGS: "-o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=15 -o BatchMode=yes"
           REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
           SOURCE: "dist/"
           REMOTE_HOST: ${{ secrets.HOST }}
