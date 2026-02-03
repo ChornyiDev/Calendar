@@ -24,23 +24,12 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Check for Dirty Shell (Remote)
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          # Використовуємо timeout, щоб крок не висів вічно, і -v для деталей
-          timeout 30s ssh -v -n -o StrictHostKeyChecking=no -o BatchMode=yes -i ~/.ssh/id_rsa -p ${{ secrets.REMOTE_PORT }} ${{ secrets.USERNAME }}@${{ secrets.HOST }} "true" > remote_output.txt 2>&1 || echo "SSH timed out or failed"
-          cat remote_output.txt
-          OUTPUT_SIZE=$(cat remote_output.txt | wc -c)
-          echo "Debug: Captured $OUTPUT_SIZE bytes of logs"
-
       - name: Deploy to Server via SSH
         uses: easingthemes/ssh-deploy@v5.0.3
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
           ARGS: "-rlgoDv" 
-          SSH_CMD_ARGS: "-o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=15 -o BatchMode=yes -o RequestTTY=no -o IPQoS=throughput -vvv"
+          SSH_CMD_ARGS: "-o StrictHostKeyChecking=no -o UpdateHostkeys=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=15 -o BatchMode=yes"
           REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
           SOURCE: "dist/"
           REMOTE_HOST: ${{ secrets.HOST }}
